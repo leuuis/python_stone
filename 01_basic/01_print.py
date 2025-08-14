@@ -3,7 +3,7 @@
 ###
 
 print("Hola mundo!")
-print('Esto tambié fucnciona con una comilla')
+print('Esto también fucnciona con una comilla')
 print("Python", "es", "genial")
 print("Python", "es", "brutal", sep = "-")
 print("Esto se imprime", end = " ")
