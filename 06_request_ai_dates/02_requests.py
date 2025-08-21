@@ -3,55 +3,45 @@
 
 # 1. Sin dependencias (díficil y sin dependencias)
 import urllib.request
-from urllib.error import HTTPError
 import json
 
-api_posts = "https://jsonplaceholder.typicode.com/posts"
+DEEPSEEK_API_KEY = "xxx"
+
+api_posts = "https://jsonplaceholder.typicode.com/posts/"
 
 try:
-    response = urllib.request.urlopen(api_posts)
-
-    if response.status == 200:
-        data = response.read()
-        json_posts = json.loads(data.decode("utf-8")) # Decodificar bytes a str y luego cargar JSON
-        print(json_posts)
-    else:
-        print(f"Error en la petición: {response.status}")
-
-    response.close()
+  response = urllib.request.urlopen(api_posts)
+  data = response.read()
+  json_data = json.loads(data.decode('utf-8'))
+  print(json_data)
+  response.close()
 except urllib.error.URLError as e:
-    print(f"Error en la conexión: {e.reason}")
+  print(f"Error en la solicitud: {e}")
 
-# 2. Con dependencia requests (fácil y con dependencias)
-# instalar en consola % pip3 install requests --break-system-package
+
+# 2. Con dependencia (requests)
 import requests
 
-print(f"\nGET:")
-api_posts_url = "https://jsonplaceholder.typicode.com/posts"
-response = requests.get(api_posts_url)
-if response.status_code == 200:
-    json_posts = response.json()  # Parsear JSON directamente
-    print(json_posts)
-    print(json_posts[0])  # Primer post
-else:
-    print(f"Error en la petición: {response.status_code}")
+print("\nGET:")
+api_posts = "https://jsonplaceholder.typicode.com/posts/"
+response = requests.get(api_posts)
+response_json = response.json()
 
-# 3. POST
-print(f"\nPOST:")
-api_posts_url = "https://jsonplaceholder.typicode.com/posts"
-input = {
-    "title": "foo",
-    "body": "bar",
-    "id": 5,
-}
-
+# 3. Un POST
+print("\nPOST:")
 try:
-    response = requests.post(url=api_posts_url, json=input)
-    print(f"Nuevo post creado: {response.status_code}")
+  response = requests.post(
+    "https://jsonplaceholder.typicode.com/posts",
+    json={
+      "title": "foo",
+      "body": "bar",
+      "userId": 1
+    })
+  print(response.status_code)
 except requests.exceptions.RequestException as e:
-    print(f"Error en la conexión: {e.reason}")
+  print(f"Error en la solicitud: {e}")
 
-# 4. Un PUT necesita todo el objeto
+# 4. Un PUT
 print("\nPUT:")
 try:
   response = requests.put(
@@ -59,7 +49,61 @@ try:
     json={
       "title": "foo",
       "body": "bar",
+      "userId": 1,
     })
+
   print(response.status_code)
 except requests.exceptions.RequestException as e:
   print(f"Error en la solicitud: {e}")
+
+# Usar la API de GPT-4o de OpenAI
+# Ref: https://platform.openai.com/docs/api-reference/making-requests
+
+OPENAI_KEY = "sk-XXXXXXXX"
+
+import json
+
+def call_openai_gpt(api_key, prompt):
+  url = "https://api.openai.com/v1/chat/completions"
+  headers = {
+    "Content-Type": "application/json",
+    "Authorization": f"Bearer {api_key}"
+  }
+  data = {
+    "model": "gpt-4o-mini",
+    "messages": [{"role": "user", "content": prompt}]
+  }
+
+  response = requests.post(url, json=data, headers=headers)
+  return response.json()
+
+api_response = call_openai_gpt(OPENAI_KEY, "Escribe un breve poema sobre la programación")
+
+# print(json.dumps(api_response, indent=2))
+
+print(api_response["choices"][0]["message"]["content"])
+
+# Llamar a la API de DEEPSEEK
+
+import json
+
+def call_deepseek(api_key, prompt):
+  url = "https://api.deepseek.com/chat/completions"
+  headers = {
+    "Content-Type": "application/json",
+    "Authorization": f"Bearer {api_key}"
+  }
+  data = {
+    "model": "deepseek-chat",
+    "messages": [{"role": "user", "content": prompt}]
+  }
+
+  response = requests.post(url, json=data, headers=headers)
+  print(response.json())
+  return response.json()
+
+api_response = call_deepseek(DEEPSEEK_API_KEY, "Escribe un breve poema sobre la programación")
+
+# print(json.dumps(api_response, indent=2))
+
+print(api_response["choices"][0]["message"]["content"])
